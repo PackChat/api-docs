@@ -154,8 +154,8 @@ components:
           example: "Learn advanced trading techniques from expert traders"
         status:
           type: string
-          enum: [draft, published, cancelled]
-          example: "published"
+          enum: [upcoming, in_progress, completed, cancelled]
+          example: "upcoming"
         session_start:
           type: string
           format: date-time
@@ -185,10 +185,6 @@ components:
           type: integer
           nullable: true
           example: 100
-        schedule_status:
-          type: string
-          enum: [past, upcoming]
-          example: "upcoming"
         creators:
           type: array
           items:
