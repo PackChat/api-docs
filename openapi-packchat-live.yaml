@@ -288,7 +288,7 @@ components:
           type: string
           minLength: 2
           maxLength: 50
-          example: "John"
+          example: "John Doe"
 
 paths:
   /auth/request-otp:
@@ -359,6 +359,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponse'
 
+  /users/me/chats:
+    get:
+      tags:
+        - Chats
+      summary: List all users chats
+      description: Returns a paginated list of chats, with optional filtering for the authenticated user
+      operationId: listUserChats
+      parameters:
+        - in: query
+          name: filter[status]
+          schema:
+            type: string
+            enum: [complete, upcoming, in_progress, cancelled]
+          description: Filter by chat status
+        - in: query
+          name: filter[stream_channel_id]
+          schema:
+            type: string
+          description: Filter by GetStream Channel UUID
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number for pagination
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatCollection'
+        '401':
+          description: Unauthenticated
+        '403':
+          description: Unauthorized
+
   /chats:
     get:
       tags:
@@ -424,7 +460,7 @@ paths:
         '404':
           description: Chat not found
 
-  /users/name:
+  /users/me/name:
     put:
       tags:
         - Authentication
@@ -449,7 +485,7 @@ paths:
         '422':
           description: Validation errors
 
-  /users/display-name:
+  /users/me/display-name:
     put:
       tags:
         - Authentication
@@ -475,7 +511,7 @@ paths:
           description: Validation errors
 
 
-  /users/avatar:
+  /users/me/avatar:
     post:
       tags:
         - Authentication
@@ -524,3 +560,4 @@ paths:
                           - "The avatar field must be an image."
                           - "The avatar field must not be greater than 5MB."
                           - "The avatar must be at least 100x100 pixels."
+      
