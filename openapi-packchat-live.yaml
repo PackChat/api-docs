@@ -524,4 +524,3 @@ paths:
                           - "The avatar field must be an image."
                           - "The avatar field must not be greater than 5MB."
                           - "The avatar must be at least 100x100 pixels."
-      
