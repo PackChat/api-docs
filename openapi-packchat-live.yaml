@@ -79,6 +79,13 @@ components:
           enum: [ios]
           description: Type of device platform
 
+    RequestOTPResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "aac70dfe-746f-4871-b33d-42b98455762f"
+
     UserResponse:
       type: object
       properties:
@@ -112,6 +119,31 @@ components:
           type: string
           format: date-time
           example: "2025-01-12T22:31:59.000000Z"
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        name:
+          type: string
+          example: " "
+        display_name:
+          type: string
+          nullable: true
+        debug:
+          type: object
+          properties:
+            otp:
+              type: string
+              example: "123456"
+
+    CreatorResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "aac70dfe-746f-4871-b33d-42b98455762f"
         first_name:
           type: string
           nullable: true
@@ -192,7 +224,7 @@ components:
         creators:
           type: array
           items:
-            $ref: '#/components/schemas/UserResponse'
+            $ref: '#/components/schemas/CreatorResponse'
         created_at:
           type: string
           format: date-time
@@ -310,7 +342,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/RequestOTPResponse'
         '400':
           description: Invalid request parameters
         '429':
@@ -407,7 +439,7 @@ paths:
           name: filter[status]
           schema:
             type: string
-            enum: [complete, upcoming, in_progress, cancelled]
+            enum: [completed, upcoming, in_progress, cancelled]
           description: Filter by chat status
         - in: query
           name: filter[stream_channel_id]
