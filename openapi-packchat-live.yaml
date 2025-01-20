@@ -21,6 +21,8 @@ security:
 tags:
   - name: Authentication
     description: Endpoints for user authentication and authorization
+  - name: User
+    description: Endpoints for user specific actions
   - name: Chats
     description: Endpoints for managing chats
 
@@ -379,7 +381,7 @@ paths:
   /users/me:
     get:
       tags:
-        - Authentication
+        - User
       summary: Get the currently authenticated user object
       description: Returns the currently authenticated user object with all properties.
       operationId: usersMe
@@ -394,7 +396,7 @@ paths:
   /users/me/chats:
     get:
       tags:
-        - Chats
+        - User
       summary: List all users chats
       description: Returns a paginated list of chats, with optional filtering for the authenticated user
       operationId: listUserChats
@@ -495,7 +497,7 @@ paths:
   /users/me/name:
     put:
       tags:
-        - Authentication
+        - User
       summary: Update user's name
       description: Updates the authenticated user's first and last name
       operationId: updateUserName
@@ -520,7 +522,7 @@ paths:
   /users/me/display-name:
     put:
       tags:
-        - Authentication
+        - User
       summary: Update user's display name
       description: Updates the authenticated user's display name
       operationId: updateUserDisplayName
@@ -546,7 +548,7 @@ paths:
   /users/me/avatar:
     post:
       tags:
-        - Authentication
+        - User
       summary: Upload or update user's avatar
       description: Updates the authenticated user's avatar image
       operationId: updateUserAvatar
@@ -592,4 +594,21 @@ paths:
                           - "The avatar field must be an image."
                           - "The avatar field must not be greater than 5MB."
                           - "The avatar must be at least 100x100 pixels."
+
+  /users/me/onboarded:
+    post:
+      tags:
+        - User
+      summary: Mark the user as onboarded
+      description: Mark the user as onboarded, register them with Stream to get chat token
+      operationId: userOnboarded
+      responses:
+        '200':
+          description: User Onboarded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthenticated
       
