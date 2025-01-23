@@ -388,17 +388,17 @@ components:
           items:
             $ref: '#/components/schemas/CreatorResponse'
 
-      PublicChatCollection:
-        type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/PublicChatResource'
-          links:
-            $ref: '#/components/schemas/PaginationLinks'
-          meta:
-            $ref: '#/components/schemas/PaginationMeta'
+    PublicChatCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicChatResource'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
 
     PaginationLinks:
       type: object
@@ -781,90 +781,90 @@ paths:
         '404':
           description: Chat not found or user not a participant
 
-    /chats/{uuid}/feedback:
-      post:
-        tags:
-          - Chats
-        summary: Submit feedback for a chat
-        operationId: submitChatFeedback
-        parameters:
-          - in: path
-            name: uuid
-            required: true
-            schema:
-              type: string
-              format: uuid
-        requestBody:
+  /chats/{uuid}/feedback:
+    post:
+      tags:
+        - Chats
+      summary: Submit feedback for a chat
+      operationId: submitChatFeedback
+      parameters:
+        - in: path
+          name: uuid
           required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - feedback
+              properties:
+                feedback:
+                  type: string
+                  minLength: 10
+      responses:
+        '200':
+          description: Feedback submitted successfully
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - feedback
-                properties:
-                  feedback:
-                    type: string
-                    minLength: 10
-        responses:
-          '200':
-            description: Feedback submitted successfully
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ChatUserResource'
-          '404':
-            description: Chat not found or user not a participant
-          '422':
-            description: Validation errors
-    /public/chats:
-      get:
-        tags:
-          - Public
-        summary: List public chats
-        description: Returns a paginated list of public chats
-        operationId: listPublicChats
-        parameters:
-          - in: query
-            name: filter[status]
-            schema:
-              type: string
-              enum: [ draft, published, cancelled ]
-            description: Filter by chat status
-          - in: query
-            name: page
-            schema:
-              type: integer
-            description: Page number for pagination
-        responses:
-          '200':
-            description: Successful response
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PublicChatCollection'
+                $ref: '#/components/schemas/ChatUserResource'
+        '404':
+          description: Chat not found or user not a participant
+        '422':
+          description: Validation errors
+  /public/chats:
+    get:
+      tags:
+        - Public
+      summary: List public chats
+      description: Returns a paginated list of public chats
+      operationId: listPublicChats
+      parameters:
+        - in: query
+          name: filter[status]
+          schema:
+            type: string
+            enum: [ draft, published, cancelled ]
+          description: Filter by chat status
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number for pagination
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicChatCollection'
 
-    /public/chats/{uuid}:
-      get:
-        tags:
-          - Public
-        summary: Get a specific public chat
-        description: Returns detailed information about a specific public chat
-        operationId: getPublicChat
-        parameters:
-          - in: path
-            name: uuid
-            required: true
-            schema:
-              type: string
-              format: uuid
-            description: UUID of the chat
-        responses:
-          '200':
-            description: Successful response
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PublicChatResource'
-          '404':
-            description: Chat not found
+  /public/chats/{uuid}:
+    get:
+      tags:
+        - Public
+      summary: Get a specific public chat
+      description: Returns detailed information about a specific public chat
+      operationId: getPublicChat
+      parameters:
+        - in: path
+          name: uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicChatResource'
+        '404':
+          description: Chat not found
