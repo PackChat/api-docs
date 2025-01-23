@@ -161,6 +161,9 @@ components:
         display_name:
           type: string
           nullable: true
+        blurb:
+          type: string
+          nullable: true
         debug:
           type: object
           properties:
