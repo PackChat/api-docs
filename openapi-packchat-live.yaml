@@ -191,7 +191,7 @@ components:
           example: "Learn advanced trading techniques from expert traders"
         status:
           type: string
-          enum: [complete, upcoming, in_progress, cancelled]
+          enum: [complete, upcoming, creators_missing, in_progress, cancelled]
           example: "published"
         session_start:
           type: string
@@ -222,10 +222,6 @@ components:
           type: integer
           nullable: true
           example: 100
-        schedule_status:
-          type: string
-          enum: [past, upcoming]
-          example: "upcoming"
         creators:
           type: array
           items:
@@ -319,9 +315,6 @@ components:
         max_participants:
           type: integer
           nullable: true
-        schedule_status:
-          type: string
-          enum: [ past, upcoming ]
         creators:
           type: array
           items:
@@ -530,7 +523,7 @@ paths:
           name: filter[status]
           schema:
             type: string
-            enum: [complete, upcoming, in_progress, cancelled]
+            enum: [complete, upcoming, creators_missing, in_progress, cancelled]
           description: Filter by chat status
         - in: query
           name: filter[stream_channel_id]
@@ -566,7 +559,7 @@ paths:
           name: filter[status]
           schema:
             type: string
-            enum: [completed, upcoming, in_progress, cancelled]
+            enum: [complete, upcoming, creators_missing, in_progress, cancelled]
           description: Filter by chat status
         - in: query
           name: filter[stream_channel_id]
