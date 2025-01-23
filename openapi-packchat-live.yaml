@@ -206,9 +206,7 @@ components:
           example: 90
           description: Duration in minutes
         entry_amount:
-          type: number
-          format: decimal
-          example: 1000.00
+          $ref: '#/components/schemas/Money'
         currency:
           type: string
           example: "GBP"
@@ -304,8 +302,7 @@ components:
         session_duration:
           type: integer
         entry_amount:
-          type: number
-          format: decimal
+          $ref: '#/components/schemas/Money'
         currency:
           type: string
         stream_channel_id:
@@ -367,8 +364,7 @@ components:
         session_duration:
           type: integer
         entry_amount:
-          type: number
-          format: decimal
+          $ref: '#/components/schemas/Money'
         currency:
           type: string
         registration_count:
@@ -441,6 +437,30 @@ components:
         total:
           type: integer
           example: 10
+    Money:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 1999
+          description: Amount in smallest currency unit (e.g. cents)
+        amount_decimal:
+          type: number
+          format: float
+          example: 19.99
+          description: Amount in decimal format
+        currency:
+          type: string
+          example: "USD"
+          description: Three-letter currency code
+        formatted:
+          type: string
+          example: "USD 19.99"
+          description: Full formatted amount with currency code
+        formatted_symbol:
+          type: string
+          example: "$19.99"
+          description: Formatted amount with currency symbol
 
 paths:
   /auth/request-otp:
