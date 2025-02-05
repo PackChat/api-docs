@@ -25,6 +25,10 @@ tags:
     description: Endpoints for user specific actions
   - name: Chats
     description: Endpoints for managing chats
+  - name: Public
+    description: Endpoints for retreiving public chats
+  - name: Notifications
+    description: Endpoints for managing notifications
 
 components:
   securitySchemes:
@@ -195,7 +199,7 @@ components:
         status:
           type: string
           enum: [complete, upcoming, creators_missing, in_progress, cancelled]
-          example: "published"
+          example: "upcoming"
         session_start:
           type: string
           format: date-time
@@ -464,6 +468,26 @@ components:
           type: string
           example: "$19.99"
           description: Formatted amount with currency symbol
+    CreateNotificationDeviceTokenRequest:
+      type: object
+      required:
+        - token
+        - device_type
+      properties:
+        token:
+          type: string
+          description: Notification device token
+        device_type:
+          type: string
+          description: Type of the device
+        live:
+          type: boolean
+          default: false
+          description: Whether this is a live token
+        name:
+          type: string
+          nullable: true
+          description: Optional name for the device token
 
 paths:
   /auth/request-otp:
@@ -752,11 +776,12 @@ paths:
                 $ref: '#/components/schemas/UserResponse'
         '401':
           description: Unauthenticated
-  /chats/{uuid}/block:
+  /users/me/chats/{uuid}/block:
     post:
       tags:
         - Chats
       summary: Block a chat for the authenticated user
+      description: Block a chat for the authenticated user
       operationId: blockChat
       parameters:
         - in: path
@@ -779,6 +804,7 @@ paths:
       tags:
         - Chats
       summary: Unblock a chat for the authenticated user
+      description: Unblock a chat for the authenticated user
       operationId: unblockChat
       parameters:
         - in: path
@@ -797,11 +823,12 @@ paths:
         '404':
           description: Chat not found or user not a participant
 
-  /chats/{uuid}/feedback:
+  /users/me/chats/{uuid}/feedback:
     post:
       tags:
         - Chats
       summary: Submit feedback for a chat
+      description: Submit feedback for a chat
       operationId: submitChatFeedback
       parameters:
         - in: path
@@ -884,3 +911,35 @@ paths:
                 $ref: '#/components/schemas/PublicChatResource'
         '404':
           description: Chat not found
+  /users/me/notification-device-tokens:
+    post:
+      tags:
+        - Notifications
+      summary: Store notification device token
+      description: Stores a new notification device token for the authenticated user
+      operationId: storeNotificationDeviceToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationDeviceTokenRequest'
+      responses:
+        '204':
+          description: Token stored successfully
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+
+    delete:
+      tags:
+        - User
+      summary: Delete all notification device tokens
+      description: Deletes all notification device tokens for the authenticated user
+      operationId: deleteNotificationDeviceTokens
+      responses:
+        '204':
+          description: Tokens deleted successfully
+        '401':
+          description: Unauthenticated
