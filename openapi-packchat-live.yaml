@@ -905,6 +905,31 @@ paths:
           description: Chat not found or user not a participant
         '422':
           description: Validation errors
+  /users/me/chats/{uuid}/join:
+    post:
+      tags:
+        - Chats
+      summary: Join a free chat
+      description: Join a chat that is free
+      operationId: joinFreeChat
+      parameters:
+        - in: path
+          name: uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Chat joined successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatUserResource'
+        '404':
+          description: Chat not found or user not found
+        '422':
+          description: Validation errors
   /public/chats:
     get:
       tags:
