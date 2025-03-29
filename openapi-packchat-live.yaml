@@ -29,6 +29,8 @@ tags:
     description: Endpoints for retreiving public chats
   - name: Notifications
     description: Endpoints for managing notifications
+  - name: Questions
+    description: Endpoints for managing chat questions
 
 components:
   securitySchemes:
@@ -146,6 +148,25 @@ components:
             otp:
               type: string
               example: "123456"
+
+    UserBaseResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "aac70dfe-746f-4871-b33d-42b98455762f"
+        chat_token:
+          type: string
+          example: " "
+        display_name:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          nullable: true
+        avatar_thumb_url:
+          type: string
+          nullable: true
 
     CreatorResponse:
       type: object
@@ -533,6 +554,109 @@ components:
           type: string
           nullable: true
           description: FCM topic for the notification
+
+    CreateQuestionData:
+      type: object
+      properties:
+        question:
+          type: string
+          description: Question to ask
+
+    CreateQuestionReplyData:
+      type: object
+      properties:
+        message:
+          type: string
+          description: message for reply
+
+    ChatQuestionCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatQuestion'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    ChatQuestion:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Unique identifier for the chat question
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        question:
+          type: string
+          description: The text content of the question
+          example: "What are your thoughts on the presentation?"
+        stream_message_id:
+          type: string
+          description: Identifier for the associated stream message
+          example: "message-123456"
+        reply_count:
+          type: integer
+          format: int32
+          description: Number of replies to this question
+          example: 5
+        user:
+          $ref: '#/components/schemas/UserBaseResponse'
+          description: The user who posted the question
+        chat:
+          $ref: '#/components/schemas/ChatResponse'
+          description: The chat this question belongs to
+        vote_count:
+          type: integer
+          format: int32
+          description: Number of votes this question has received
+          example: 12
+        created_at:
+          type: string
+          format: date-time
+          description: When the question was created
+          example: "2023-01-15T14:30:00+00:00"
+        updated_at:
+          type: string
+          format: date-time
+          description: When the question was last updated
+          example: "2023-01-15T14:45:00+00:00"
+
+    ChatQuestionVoteCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatQuestionVotes'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    ChatQuestionVotes:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserBaseResponse'
+          description: The user who posted the question
+        voted_at:
+          type: string
+          format: date-time
+          description: When the vote was created
+          example: "2023-01-15T14:30:00+00:00"
+
+    ChatQuestionLimitResource:
+      type: object
+      properties:
+        current_count:
+          type: integer
+          description: How many questions have been asked on this chat by authenticated user
+        max_count:
+          type: integer
+          description: Max limit of questions that can be asked per chat
 
 paths:
   /auth/request-otp:
@@ -1034,3 +1158,223 @@ paths:
           description: Unauthenticated
         '422':
           description: Validation errors
+
+  /chats/{chat_uuid}/questions:
+    get:
+      tags:
+        - Questions
+      summary: Get all given questions for a chat
+      description: Get all given questions for a chat.
+      operationId: getChatQuestions
+      parameters:
+        - in: path
+          name: chat_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat
+      responses:
+        '200':
+          description: Paginated list of questions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatQuestionCollection'
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+
+  /chats/{chat_uuid}/questions/limit:
+    get:
+      tags:
+        - Questions
+      summary: Get limit for authenticated user for question count
+      description: Get limit for authenticated user for question count
+      operationId: getChatQuestionLimit
+      parameters:
+        - in: path
+          name: chat_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat
+      responses:
+        '200':
+          description: Limit state for questions asked by user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatQuestionLimitResource'
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+
+  /chats/{chat_uuid}/question:
+    post:
+      tags:
+        - Questions
+      summary: Create a question for a chat
+      description: Creates a question in the DB for the given chat and sends the question to GetStream
+      operationId: createChatQuestion
+      parameters:
+        - in: path
+          name: chat_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionData'
+      responses:
+        '200':
+          description: Question created and sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatQuestion'
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+
+  /chats/{chat_uuid}/question/{chat_question_uuid}/votes:
+    get:
+      tags:
+        - Questions
+      summary: Get all given votes for a question
+      description: Get all given votes for a question, who made them and when.
+      operationId: getChatQuestionVotes
+      parameters:
+        - in: path
+          name: chat_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat
+        - in: path
+          name: chat_question_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat question
+      responses:
+        '200':
+          description: Paginated list of question upvotes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatQuestionVoteCollection'
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+
+  /chats/{chat_uuid}/questions/{chat_question_uuid}/upvote:
+    post:
+      tags:
+        - Questions
+      summary: Create an upvote for a given question for a chat
+      description: Creates an upvote record for a given question in the DB for the given chat
+      operationId: createChatQuestionUpvote
+      parameters:
+        - in: path
+          name: chat_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat
+        - in: path
+          name: chat_question_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat question
+      responses:
+        '204':
+          description: Question upvote created and sent successfully
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+
+  /chats/{chat_uuid}/questions/{chat_question_uuid}/downvote:
+    post:
+      tags:
+        - Questions
+      summary: Create an downvote for a given question for a chat
+      description: Creates an downvote record for a given question in the DB for the given chat
+      operationId: createChatQuestionDownvote
+      parameters:
+        - in: path
+          name: chat_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat
+        - in: path
+          name: chat_question_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat question
+      responses:
+        '204':
+          description: Question downvote created and sent successfully
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+
+  /chats/{chat_uuid}/question/{chat_question_uuid}/reply:
+    post:
+      tags:
+        - Questions
+      summary: Create a reply for a question for a chat
+      description: Creates a reply for a question in the DB for the given chat and sends the reply to GetStreamss parent message
+      operationId: createChatQuestionReply
+      parameters:
+        - in: path
+          name: chat_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat
+        - in: path
+          name: chat_question_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the chat question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionReplyData'
+      responses:
+        '204':
+          description: Question reply created and sent successfully
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+
+
+
