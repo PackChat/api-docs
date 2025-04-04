@@ -1246,7 +1246,7 @@ paths:
         '422':
           description: Validation errors
 
-  /chats/{chat_uuid}/question/{chat_question_uuid}/votes:
+  /chats/{chat_uuid}/questions/{chat_question_uuid}/votes:
     get:
       tags:
         - Questions
@@ -1268,6 +1268,13 @@ paths:
             type: string
             format: uuid
           description: UUID of the chat question
+        - in: query
+          name: filter[user_id]
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filter votes by user UUID
       responses:
         '200':
           description: Paginated list of question upvotes
@@ -1340,7 +1347,7 @@ paths:
         '422':
           description: Validation errors
 
-  /chats/{chat_uuid}/question/{chat_question_uuid}/reply:
+  /chats/{chat_uuid}/questions/{chat_question_uuid}/reply:
     post:
       tags:
         - Questions
