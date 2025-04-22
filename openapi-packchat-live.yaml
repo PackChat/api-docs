@@ -31,6 +31,8 @@ tags:
     description: Endpoints for managing notifications
   - name: Questions
     description: Endpoints for managing chat questions
+  - name: App
+    description: Endpoints for generic app endpoints
 
 components:
   securitySchemes:
@@ -140,6 +142,12 @@ components:
           type: string
           example: " "
         display_name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        creator_status:
           type: string
           nullable: true
         debug:
@@ -664,6 +672,70 @@ components:
         max_count:
           type: integer
           description: Max limit of questions that can be asked per chat
+
+    UpdateOnboardingSocialChannelRequest:
+      type: object
+      required:
+        - channel
+        - handle
+      properties:
+        channel:
+          type: string
+          description: The social media platform
+          enum:
+            - tiktok
+            - threads
+            - twitter
+            - instagram
+            - youtube
+            - twitch
+          example: "twitter"
+        handle:
+          type: string
+          description: The user's handle or username on the platform
+          example: "@johndoe"
+
+    UpdateCreatorStatusRequest:
+      type: object
+      required:
+        - date_time_field
+        - value
+      properties:
+        date_time_field:
+          type: string
+          description: The status field to update
+          enum:
+            - creator_pending_at
+            - creator_approved_at
+            - creator_denied_at
+          example: "creator_approved_at"
+        value:
+          type: string
+          format: date-time
+          description: The timestamp to set for the specified field
+          example: "2023-12-15T14:30:00Z"
+    CreateAppFeedbackRequest:
+      type: object
+      required:
+        - feedback
+      properties:
+        feedback:
+          type: string
+          description: The user's feedback message about the application
+          example: "I love the new user interface, but found a small bug in the chat feature."
+    SubmitCreatorSuggestionRequest:
+      type: object
+      required:
+        - suggestions
+      properties:
+        suggestions:
+          type: array
+          description: An array of creator suggestions
+          minItems: 1
+          items:
+            type: string
+            description: A creator suggestion, which could be an email, username, or name
+          example: ["john.doe@example.com", "@famous_creator"]
 
 paths:
   /auth/request-otp:
@@ -1424,6 +1496,310 @@ paths:
           description: Unauthenticated
         '422':
           description: Validation errors
-
-
-
+  /users/me/email:
+    put:
+      summary: Update user email
+      description: Updates the authenticated users email address and notifies Stream Chat of the change
+      operationId: updateUserEmail
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The new email address for the user
+                  example: "user@example.com"
+            examples:
+              updateEmail:
+                value:
+                  email: "jane.smith@example.com"
+        required: true
+      responses:
+        '200':
+          description: Email updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token not provided"
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The given data was invalid."
+                  errors:
+                    type: object
+                    properties:
+                      email:
+                        type: array
+                        items:
+                          type: string
+                          example: "The email must be a valid email address."
+  /users/me/onboarding-social:
+    put:
+      summary: Update user's social media channel
+      description: Updates the authenticated user's social media channel information during onboarding
+      operationId: updateOnboardingSocialChannel
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOnboardingSocialChannelRequest'
+            examples:
+              twitter:
+                value:
+                  channel: "twitter"
+                  handle: "@johndoe"
+              instagram:
+                value:
+                  channel: "instagram"
+                  handle: "john.doe"
+        required: true
+      responses:
+        '200':
+          description: Social media channel updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token not provided"
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The given data was invalid."
+                  errors:
+                    type: object
+                    properties:
+                      channel:
+                        type: array
+                        items:
+                          type: string
+                          example: "The selected channel is invalid."
+                      handle:
+                        type: array
+                        items:
+                          type: string
+                          example: "The handle field is required."
+  /users/me/creator-status:
+    put:
+      summary: Update user creator status
+      description: Updates the authenticated user's creator status by setting a specific date-time field
+      operationId: updateCreatorStatus
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCreatorStatusRequest'
+            examples:
+              creatorPending:
+                value:
+                  date_time_field: "creator_pending_at"
+                  value: "2023-12-01T12:00:00Z"
+              creatorApproved:
+                value:
+                  date_time_field: "creator_approved_at"
+                  value: "2023-12-15T14:30:00Z"
+              creatorDenied:
+                value:
+                  date_time_field: "creator_denied_at"
+                  value: "2023-12-10T09:15:00Z"
+        required: true
+      responses:
+        '200':
+          description: Creator status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token not provided"
+                  code:
+                    type: string
+                    example: "INVALID_SESSION"
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The given data was invalid."
+                  errors:
+                    type: object
+                    properties:
+                      date_time_field:
+                        type: array
+                        items:
+                          type: string
+                          example: "The selected date time field is invalid."
+                      value:
+                        type: array
+                        items:
+                          type: string
+                          example: "The value must be a valid date."
+  /feedback:
+    post:
+      summary: Submit app feedback
+      description: Allows authenticated users to submit feedback about the application
+      operationId: createAppFeedback
+      tags:
+        - App
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppFeedbackRequest'
+            examples:
+              basicFeedback:
+                value:
+                  feedback: "I love the new user interface, but found a small bug in the chat feature."
+        required: true
+      responses:
+        '204':
+          description: Feedback submitted successfully
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token not provided"
+                  code:
+                    type: string
+                    example: "INVALID_SESSION"
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The given data was invalid."
+                  errors:
+                    type: object
+                    properties:
+                      feedback:
+                        type: array
+                        items:
+                          type: string
+                          example: "The feedback field is required."
+  /creator-suggestions:
+    post:
+      summary: Submit creator suggestions
+      description: Allows authenticated users to submit one or more creator suggestions
+      operationId: submitCreatorSuggestions
+      tags:
+        - App
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitCreatorSuggestionRequest'
+            examples:
+              multipleSuggestions:
+                value:
+                  suggestions: [
+                    "john.doe@example.com",
+                    "@famous_creator",
+                    "Creator Name"
+                  ]
+              singleSuggestion:
+                value:
+                  suggestions: [
+                    "jane.smith@example.com"
+                  ]
+        required: true
+      responses:
+        '204':
+          description: Creator suggestions submitted successfully
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token not provided"
+                  code:
+                    type: string
+                    example: "INVALID_SESSION"
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The given data was invalid."
+                  errors:
+                    type: object
+                    properties:
+                      suggestions:
+                        type: array
+                        items:
+                          type: string
+                          example: "The suggestions field is required."
+                      "suggestions.0":
+                        type: array
+                        items:
+                          type: string
+                          example: "The suggestions.0 field is required."
