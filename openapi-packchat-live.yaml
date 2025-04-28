@@ -433,6 +433,18 @@ components:
           items:
             $ref: '#/components/schemas/CreatorResponse'
 
+    PublicTopCreatorsCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatorResponse'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
     PublicChatCollection:
       type: object
       properties:
@@ -861,6 +873,16 @@ paths:
           schema:
             type: string
           description: Filter by GetStream Channel UUID
+        - in: query
+          name: filter[only_participating]
+          schema:
+            type: boolean
+          description: 1 or 0. Optional filter to only return chats the authenticated user is a creator or participant of
+        - in: query
+          name: filter[except_participating]
+          schema:
+            type: boolean
+          description: 1 or 0. Optional filter to only return chats the authenticated user is NOT a creator or participant of
         - in: query
           name: page
           schema:
@@ -1803,3 +1825,23 @@ paths:
                         items:
                           type: string
                           example: "The suggestions.0 field is required."
+  /public/top-creators:
+    get:
+      tags:
+        - Public
+      summary: Public endpoint to list top creators
+      description: Returns a paginated list of top creators
+      operationId: listTopCreators
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number for pagination
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicTopCreatorsCollection'
