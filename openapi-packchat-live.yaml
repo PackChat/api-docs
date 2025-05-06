@@ -783,6 +783,16 @@ components:
             type: string
             description: A creator suggestion, which could be an email, username, or name
           example: ["john.doe@example.com", "@famous_creator"]
+    FeedbackResource:
+      type: object
+      properties:
+        feedback:
+          type: string
+          description: The feedback given
+        feedback_given_at:
+          type: string
+          format: date-time
+          description: The datetime the feedback was given
 
 paths:
   /auth/request-otp:
@@ -1129,6 +1139,30 @@ paths:
           description: Chat not found or user not a participant
 
   /users/me/chats/{uuid}/feedback:
+    get:
+      tags:
+        - Chats
+      summary: Get feedback for a chat
+      description: Get feedback for a chat if you are a creator of it
+      operationId: getCreatorChatFeedback
+      parameters:
+        - in: path
+          name: uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Feedback received successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResource'
+        '401':
+          description: User not a creator of the chat
+        '404':
+          description: Chat not found
     post:
       tags:
         - Chats
