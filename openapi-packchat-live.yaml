@@ -176,6 +176,31 @@ components:
           type: string
           nullable: true
 
+    StaffResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "aac70dfe-746f-4871-b33d-42b98455762f"
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        name:
+          type: string
+          example: " "
+        display_name:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          nullable: true
+        avatar_thumb_url:
+          type: string
+          nullable: true
+
     CreatorResponse:
       type: object
       properties:
@@ -243,6 +268,8 @@ components:
           example: "upcoming"
         private:
           type: boolean
+        archived:
+          type: boolean
         session_start:
           type: string
           format: date-time
@@ -274,6 +301,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreatorResponse'
+        staff:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffResponse'
         created_at:
           type: string
           format: date-time
@@ -346,6 +377,8 @@ components:
           example: "upcoming"
         private:
           type: boolean
+        archived:
+          type: boolean
         session_start:
           type: string
           format: date-time
@@ -410,6 +443,8 @@ components:
           enum: [ complete, upcoming, creators_missing, in_progress, cancelled ]
           example: "upcoming"
         private:
+          type: boolean
+        archived:
           type: boolean
         session_start:
           type: string
