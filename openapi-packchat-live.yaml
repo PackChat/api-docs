@@ -1976,7 +1976,10 @@ paths:
       description: Creates a new app subscription for the authenticated user
       operationId: createAppSubscription
       requestBody:
-        $ref: '#/components/schemas/CreateAppSubscription'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppSubscription'
       responses:
         '201':
           description: Subscription created successfully
@@ -1997,7 +2000,10 @@ paths:
       description: Updates the app subscription for the authenticated user
       operationId: updateAppSubscription
       requestBody:
-        $ref: '#/components/schemas/UpdateAppSubscription'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAppSubscription'
       responses:
         '200':
           description: Subscription updated successfully
